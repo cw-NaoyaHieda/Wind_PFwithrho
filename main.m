@@ -36,14 +36,14 @@ v = v;
 r = rho;
 alp = alpha;
 
-[pfOut1, pfOut2, wt, pfOut1_mean, pfOut2_mean] = particlefilter(par1, y, v, r, alp, 1024);
+[pfOut1, pfOut2, wt, pfOut1_mean, pfOut2_mean] = particlefilter(par1, y, v, r, alp, 124);
 
-plot(2:(N+1),alp)
-hold on
-plot(2:(N+1),pfOut1_mean(2:(N+12:(N+1))))
-%csvwrite("filterdata/out1.csv",pfOut1);
-%csvwrite("filterdata/out2.csv",pfOut2);
-%csvwrite("filterdata/weight.csv",wt);
-%csvwrite("filterdata/out1_mean.csv",pfOut1_mean(1:(N+1)));
-%csvwrite("filterdata/out2_mean.csv",pfOut2_mean(1:(N+1)));
+%plot(2:(N+1),alp)
+%hold on
+%plot(2:(N+1),pfOut1_mean(2:(N+1:(N+1))))
+%csvwrite("filterdata/out1_1000.csv",pfOut1);
+%csvwrite("filterdata/out2_1000.csv",pfOut2);
+%csvwrite("filterdata/weight_1000.csv",wt);
+%csvwrite("filterdata/out1_mean_1000.csv",pfOut1_mean(1:(N+1)));
+%csvwrite("filterdata/out2_mean_1000.csv",pfOut2_mean(1:(N+1)));
 
