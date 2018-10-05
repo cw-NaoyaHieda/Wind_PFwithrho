@@ -10,12 +10,12 @@ mu_rho = par(7); % constants in log wind speed
 sig_rho = par(8);
 N = length(y);
 
-pfOut1 = zeros((N+1), nParticle,'gpuArray');
+pfOut1 = zeros((N+1), nParticle);
 pfOut1_mean = zeros((N+1),1);
-pfOut2 = zeros((N+1), nParticle,'gpuArray');
+pfOut2 = zeros((N+1), nParticle);
 pfOut2_mean = zeros((N+1),1);
-wt = zeros((N+1), nParticle,'gpuArray');
-rho1 = zeros((N+1), nParticle,'gpuArray');
+wt = zeros((N+1), nParticle);
+rho1 = zeros((N+1), nParticle);
 
 a0 = randn(nParticle,1);
 t0 = rwrpcauchy(nParticle, mu_f, rho_f);
@@ -45,8 +45,8 @@ tmp1 = arrayfun(@(theta, rho_g) d_conditional_WJ(y(it-1), theta, mu_g, rho_g, mu
 
 tmp2 = arrayfun(@(x) gampdf(v(it-1)/(gam*exp(x/2)) , V, 1/V)/(gam*exp(x/2)), pfOut1(it,:));
 
-wt(it,:) = (tmp1/sum(tmp1)) .* (tmp2/sum(tmp2)) .* wt(it-1,:);
-
+%wt(it,:) = (tmp1/sum(tmp1)) .* (tmp2/sum(tmp2)) .* wt(it-1,:);
+wt(it,:) = (tmp1) .* (tmp2) .* wt(it-1,:);
 wt(it,:) = wt(it,:) / sum(wt(it,:));
 
 %[pfOut1(it,:), pfOut2(it,:)] = Resample2(pfOut1(it,:), pfOut2(it,:), wt(it,:), nParticle);

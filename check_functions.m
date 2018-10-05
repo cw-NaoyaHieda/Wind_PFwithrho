@@ -1,5 +1,6 @@
 
 data = r_conditional_WJ(10000, 0.3, 0.3, 0.1,  0.4, 0.8, 1);
+%hist(data)data = r_conditional_WJ(10000, 0.3, 0.3, 0.1,  0.4, 0.8, 1);
 %hist(data)
 
 d_conditional_WJ(2, 0.3, 0.6, 0.1,  0.4, 0.8, 1)
@@ -21,4 +22,10 @@ pd = makedist('Stable','alpha',1,'beta',0,'gam',(-log(0.01))^2,'delta',0.2);
 %y = abs(pdf(pd,x));
 %hist(y)
 
-gampdf(20,V,V)
+%gampdf(20,V,V)
+
+data = r_conditional_WJ(10000, 0.3, 0.3, 0.1,  0.4, 0.8, 1);
+%hist(data)
+
+data2 = r_conditional_WJ_GPU(10000, 0.3, 0.3, 0.1,  0.4, 0.8, 1);
+hist(data2)

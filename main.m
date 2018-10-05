@@ -36,14 +36,24 @@ v = v;
 r = rho;
 alp = alpha;
 
-[pfOut1, pfOut2, wt, pfOut1_mean, pfOut2_mean] = particlefilter(par1, y, v, r, alp, 124);
+[pfOut1, pfOut2, wt, pfOut1_mean, pfOut2_mean] = particlefilter_reallycorrect(par1, y, v, r, alp, 1024);
+[smwt] = particlesmoother(phi1, pfOut1, wt);
 
-%plot(2:(N+1),alp)
-%hold on
-%plot(2:(N+1),pfOut1_mean(2:(N+1:(N+1))))
-%csvwrite("filterdata/out1_1000.csv",pfOut1);
-%csvwrite("filterdata/out2_1000.csv",pfOut2);
-%csvwrite("filterdata/weight_1000.csv",wt);
-%csvwrite("filterdata/out1_mean_1000.csv",pfOut1_mean(1:(N+1)));
-%csvwrite("filterdata/out2_mean_1000.csv",pfOut2_mean(1:(N+1)));
+sm_mean = diag(smwt(2:(N+1),:) * gpuArray(pfOut1(2:(N+1),:)'));
+
+
+plot(2:(N+1),alp)
+hold on
+plot(2:(N+1),pfOut1_mean(2:(N+1)))
+hold on
+plot(2:(N+1),sm_mean)
+csvwrite("filterdata/out1_1024really.csv",pfOut1);
+csvwrite("filterdata/out2_1024really.csv",pfOut2);
+csvwrite("filterdata/weight_1024really.csv",wt);
+csvwrite("filterdata/out1_mean_1024really.csv",pfOut1_mean(1:(N+1)));
+csvwrite("filterdata/out2_mean_1024really.csv",pfOut2_mean(1:(N+1)));
+csvwrite("filterdata/sm_mean_1024.csv",sm_mean);
+csvwrite("filterdata/smwt.csv",smwt);
+
+
 
