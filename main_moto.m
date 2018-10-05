@@ -72,8 +72,3 @@ hold on
 plot(1:(dT-1),sm_X_mean)
 hold off
 legend('Answer','filter','smoother')
-
-
-
-
-

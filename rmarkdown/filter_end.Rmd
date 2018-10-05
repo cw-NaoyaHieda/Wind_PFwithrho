@@ -1,0 +1,71 @@
+---
+title: "Filterまで"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set
+library(ggplot2)
+library(tidyverse)
+setwd("/home/naoya/Desktop/Wind_PF")
+answer <- read.csv("sample.csv")
+
+out1 <- read.csv("filterdata/out1.csv",header = F)
+out2 <- read.csv("filterdata/out2.csv",header = F)
+wt <- read.csv("filterdata/weight.csv",header = F)
+
+out1R <- read.csv("R_data/out1.csv")[,-1]
+out2R <- read.csv("R_data/out2.csv")[,-1]
+wtR <- read.csv("R_data/wt.csv")[,-1]
+
+```
+
+
+```{r}
+circular.mean <- function(m.sin, m.cos){
+  if(m.sin >0 &  m.cos> 0) return(atan(m.sin/m.cos))
+  else if(m.sin < 0 &  m.cos >  0) return(atan(m.sin/m.cos))
+  else if(m.sin < 0 &  m.cos <  0) return(atan(m.sin/m.cos)-pi)
+  else if(  m.sin >0 & m.cos <  0) return(atan(m.sin/m.cos)+pi)
+}
+
+Rno1 <- rowSums(out1R*wtR)
+out <- rowSums(out1*wt)
+
+
+plot_d <- data.frame(x=1:100,ans=answer$alp,ShiohamaT=Rno1[-1] ,out[-1] )
+
+ggplot(plot_d %>% gather(id,alp,-x)) + geom_path(aes(x=x,y=alp,color=id)) 
+
+
+Rno2 <- apply(data.frame(rowSums(sin(out2R)*wtR),rowSums(cos(out2R)*wtR)),1,function(x) circular.mean(x[1],x[2]))
+out <- apply(data.frame(rowSums(sin(out2)*wtR),rowSums(cos(out2)*wtR)),1,function(x) circular.mean(x[1],x[2]))
+
+
+plot_d <- data.frame(x=1:100,ans=answer$y,
+                     ShiohamaT=Rno2[-1],out[-1] )
+
+ggplot(plot_d %>% gather(id,y,-x)) + geom_path(aes(x=x,y=y,color=id)) 
+
+
+
+ShiohamaT <- sapply(2:101, function(x){(0.95*tanh( sum(out1R[x,]*wtR[x,])+0.5)+1)/2 })
+out <- sapply(2:101, function(x){(0.95*tanh( sum(out1[x,]*wt[x,])+0.5)+1)/2 })
+
+plot_d <- data.frame(x=1:100,ans=answer$r,
+                     ShiohamaT,out )
+ggplot(plot_d %>% gather(id,r,-x)) + geom_path(aes(x=x,y=r,color=id)) 
+
+
+ShiohamaT<-sapply(2:101, function(x){
+  3*exp(sum(out1R[x,]*wtR[x,])/2)} )
+
+out<-sapply(2:101, function(x){
+  3*exp(sum(out1[x,]*wt[x,])/2)} )
+
+plot_d <- data.frame(x=1:100,ans=answer$v,
+                     ShiohamaT,out )
+ggplot(plot_d %>% gather(id,v,-x)) + geom_path(aes(x=x,y=v,color=id)) 
+
+```
+

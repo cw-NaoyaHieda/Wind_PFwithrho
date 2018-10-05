@@ -1,11 +1,11 @@
 %GPUのデバイスの数確認
-gpuDeviceCount
+%gpuDeviceCount
 %現在使用しているデバイスの確認
-gpuDevice
+%gpuDevice
 %seed
-rng(1024)
+addpath('functions')
+rng(1000)
 clear global;
-reset(gpuDevice(1));
 %ParticleFilter数
 %各パラメータ
 N = 100;
@@ -20,60 +20,30 @@ sig_rho=1;
 %パラメータセット
 par1 = [phi1 gam mu_g mu_f rho_f V mu_rho sig_rho];
 
+%[alpha, theta, v, rho] = simulate_data(N, par1);
+sample = csvread("sample.csv",1,1);
+theta = sample(:,1);
+v =sample(:,2);
+rho =sample(:,3);
+alpha =sample(:,4);
+%plot(1:N,alpha)
+%plot(1:N,theta)
+%plot(1:N,v)
+%plot(1:N,rho)
 
-z <- simulate_data(N, par=par1)
+y = theta;
+v = v;
+r = rho;
+alp = alpha;
 
-%答え
-X = ones(dT,1,'gpuArray');
-DR = ones(dT,1,'gpuArray');
+[pfOut1, pfOut2, wt, pfOut1_mean, pfOut2_mean] = particlefilter(par1, y, v, r, alp, 1024);
 
-X(1) = sqrt(beta)*X_0 + sqrt(1 - beta) * random('Normal',0,1);
-
-
-for i = 2:dT
-    X(i) = sqrt(beta)*X(i-1) + sqrt(1 - beta) * random('Normal',0,1);
-    DR(i) = r_DR(X(i-1),q_qnorm, rho, beta);
-end
-fprintf('X DR set\n');
-DR(1) = DR(2)*(random('Normal',0,1)*0.05+1);
-csvwrite("data_9/X_plot.csv",X);
-csvwrite("data_9/DR_plot.csv",DR);
-csvwrite("data_9/DR_mean.csv",(q_qnorm-sqrt(beta*rho)*X)/(1-rho));
-%data = csvread("data/X.csv");
-%X = data(1:98,3);
-%pd = makedist('Normal',0,1);
-%DR = icdf(pd,data(2:99,5));
-
-
-X_0_est = X_0;
-beta_est = beta;
-rho_est = rho;
-q_qnorm_est = q_qnorm;
-
-[filter_X, filter_weight, filter_X_mean] = particle_filter(N, dT, DR, beta, q_qnorm, rho, X_0);
-fprintf('Filter end\n');
-csvwrite('data_9/filter_X.csv',filter_X);
-csvwrite('data_9/filter_weight.csv',filter_weight)
-csvwrite('data_9/filter_mean.csv',filter_X_mean);
-[sm_X, sm_weight, sm_X_mean] = particle_smoother(N, dT, beta, filter_X, filter_weight);
-fprintf('Smoothing end\n');
-csvwrite('data_9/smoothing_mean.csv',sm_X_mean);
-[pw_weight] = pair_wise_weight(N, dT, beta_est, filter_X, filter_weight, sm_weight);
-fprintf('pw_weight set\n');
-PMCEM = @(params)Q_calc_nf(params, X_0, dT, pw_weight, filter_X, sm_weight, DR);
-first_pm = [sig_env(beta),q_qnorm,sig_env(rho)];
-%options = optimoptions(@fminunc,'Display','iter','UseParallel',true,'Algorithm','quasi-newton');
-options = optimoptions(@fminunc,'Display','iter','Algorithm','quasi-newton');
-[params,fval,exitflag,output] = fminunc(PMCEM, first_pm, options);
-params
-PMCEM(first_pm)
-fval
-csvwrite("data/matlab_pf_809.csv",filter_X_mean);
-csvwrite("data/matlab_sm_809.csv",sm_X_mean);
-plot(1:dT,X)
+plot(2:(N+1),alp)
 hold on
-plot(1:(dT-1),filter_X_mean)
-hold on
-plot(1:(dT-1),sm_X_mean)
-hold off
-legend('Answer','filter','smoother')
+plot(2:(N+1),pfOut1_mean(2:(N+12:(N+1))))
+%csvwrite("filterdata/out1.csv",pfOut1);
+%csvwrite("filterdata/out2.csv",pfOut2);
+%csvwrite("filterdata/weight.csv",wt);
+%csvwrite("filterdata/out1_mean.csv",pfOut1_mean(1:(N+1)));
+%csvwrite("filterdata/out2_mean.csv",pfOut2_mean(1:(N+1)));
+
