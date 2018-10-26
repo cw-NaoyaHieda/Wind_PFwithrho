@@ -1,4 +1,4 @@
-function [pfOut1, pfOut2, wt, pfOut1_mean, pfOut2_mean] = particlefilter_reallycorrect(par, y, v, r, alp, nParticle, resample_express)
+function [pfOut1, pfOut2, wt, pfOut1_mean, pfOut2_mean, rho1] = particlefilter_reallycorrect2(par, y, v, r, alp, nParticle, resample_express)
 
 if nargin==6
   resample_express= 1;
@@ -20,7 +20,7 @@ pfOut2_mean = zeros((N+1),1);
 wt = zeros((N+1), nParticle);
 rho1 = zeros((N+1), nParticle);
 
-a0 = randn(nParticle,1) * phi1;
+a0 = randn(nParticle,1);
 t0 = rwrpcauchy(nParticle, mu_f, rho_f);
 t0 = arrayfun(@(x) pi_shori(x), t0);
 
@@ -39,7 +39,7 @@ nEff = N/10;
 for it = 2:(N+1)
 
 pfOut1(it,:) = phi1 * pfOut1(it - 1, :) + randn(1, nParticle)*sqrt(1-phi1^2);
-rho1(it-1,:) = 0.95*( tanh( sig_rho * pfOut1(it-1,:) + mu_rho)+1) / 2;
+rho1(it-1,:) = 0.95 * ( tanh( sig_rho * pfOut1(it-1,:) + mu_rho)+1) / 2;
 pfOut2(it,:) = arrayfun(@(x,y) r_conditional_WJ(1, x, mu_g, y, mu_f, rho_f, 1), pfOut2(it-1,:), rho1(it-1,:));
 %pfOut2(it,:) = arrayfun(@(x) pi_shori(x), pfOut2(it,:));
 tmp1 = arrayfun(@(theta, rho_g) d_conditional_WJ(y(it-1), theta, mu_g, rho_g, mu_f, rho_f, 1), pfOut2(it-1,:), rho1(it-1,:));
