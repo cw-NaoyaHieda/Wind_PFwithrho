@@ -1,4 +1,4 @@
-function [pfOut1,  wt, pfOut1_mean, pfOut2_mean, rho1] = particle__filter_now(par, mu_rho, sig_rho,y, v, r, alp, nParticle)
+function [pfOut1,  wt, pfOut1_mean, pfOut2_mean, rho1] = particle__filter_now_cpu(par, mu_rho, sig_rho,y, v, r, alp, nParticle)
 
 phi1 = par(1); % AR in state of wind speed
 gam  = par(2); % constants in log wind speed
@@ -10,19 +10,19 @@ mu_rho = par(7); % constants in log wind speed
 sig_rho = par(8);
 N = length(y);
 
-pfOut1 = zeros((N-1), nParticle,'gpuArray');
-pfOut1_mean = zeros((N-1),1,'gpuArray');
-pfOut2 = zeros((N), nParticle,'gpuArray');
-pfOut2_mean = zeros((N),1,'gpuArray');
-wt = zeros((N-1), nParticle,'gpuArray');
-rho1 = zeros((N-1), nParticle,'gpuArray');
+pfOut1 = zeros((N-1), nParticle);
+pfOut1_mean = zeros((N-1),1);
+pfOut2 = zeros((N), nParticle);
+pfOut2_mean = zeros((N),1);
+wt = zeros((N-1), nParticle);
+rho1 = zeros((N-1), nParticle);
 
-a0 = randn(nParticle,1);
+a0 = randn(nParticle,1) * sqrt(1-phi1^2);
 t0 = rwrpcauchy(nParticle, mu_f, rho_f);
 t0 = arrayfun(@(x) pi_shori(x), t0);
 
 
-pfOut1(1, :) = a0*sqrt(1-phi1^2);
+pfOut1(1, :) = a0;
 pfOut2(1, :) = t0;
 rho1(1,:) = 0.95*(tanh(sig_rho*a0 + mu_rho )+1)/2;
 wt(1,:) = 1 / nParticle;
